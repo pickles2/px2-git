@@ -60,15 +60,24 @@ class main{
 				$this->path_git_home = $base_path;
 				break;
 			}
-			if( $base_path == dirname($base_path) ){
+			if( $base_path == dirname($base_path).'/' ){
 				// not found
 				break;
 			}
-			$base_path = dirname($base_path);
+			$base_path = dirname($base_path).'/';
 		}
 		// var_dump($this->path_git_home);
 		$this->git->setRepository( $this->path_git_home );
 
+
+	}
+
+	/**
+	 * git リポジトリのパスを取得
+	 * @return string git リポジトリのパス
+	 */
+	public function get_path_git_home(){
+		return $this->path_git_home;
 	}
 
 	/**
@@ -85,6 +94,8 @@ class main{
 		// var_dump($path);
 		// var_dump($options);
 		$res = $this->git->init($path, $options);
+		$this->path_git_home = $path;
+		$this->git->setRepository( $this->path_git_home );
 		// var_dump($res);
 		return $res;
 	}
@@ -102,6 +113,7 @@ class main{
 
 	/**
 	 * commit sitemap
+	 * @param string $commit_message コミットメッセージ
 	 * @return array result
 	 */
 	public function commit_sitemap($commit_message = ''){
@@ -117,8 +129,17 @@ class main{
 				array()
 			);
 		} catch(\Exception $e) {
-			echo $e->getMessage();
+			echo "\n\n\n";
+			echo '---- PHPGit Exception: code '.$e->getCode().';'."\n";
+			echo $e->getFile();
+			echo ' (Line: '.$e->getLine().')'."\n";
+			echo( $e->getMessage() );
+			echo "\n";
+			// var_dump( $e->getTrace() );
+			// echo "\n";
+			echo '---------- / PHPGit Exception'."\n";
 		}
+		// var_dump(__LINE__);
 		// var_dump($res);
 
 		return $res;

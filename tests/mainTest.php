@@ -11,8 +11,13 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		mb_internal_encoding('UTF-8');
 		$this->fs = new tomk79\filesystem();
 
-		$this->path_git_home = __DIR__.'/testdata/';
-		$this->path_entry_script = __DIR__.'/testdata/htdocs/.px_execute.php';
+		$this->fs->copy_r(
+			__DIR__.'/testdata/htdocs/',
+			__DIR__.'/testdata/git_home/'
+		);
+
+		$this->path_git_home = __DIR__.'/testdata/git_home/';
+		$this->path_entry_script = __DIR__.'/testdata/git_home/.px_execute.php';
 	}
 
 
@@ -40,14 +45,14 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$memo_SCRIPT_FILENAME = $_SERVER['SCRIPT_FILENAME'];
 		$_SERVER['SCRIPT_FILENAME'] = $this->path_entry_script;
 		$cd = realpath('.');
-		chdir(__DIR__.'/testdata/htdocs/');
+		chdir( $this->path_git_home );
 		$px = new picklesFramework2\px('./px-files/');
 
 		$px2git = new tomk79\pickles2\git\main( $px );
-		array_push($rtn, array($px2git));
+		// array_push($rtn, array($px2git));
 
 		$_SERVER['SCRIPT_FILENAME'] = $memo_SCRIPT_FILENAME;
-		chdir($cd);
+		chdir( $cd );
 
 		return $rtn;
 	}
@@ -60,10 +65,11 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$px2git->init( $this->path_git_home );
 		$this->assertTrue( $this->fs->is_dir( $this->path_git_home.'.git' ) );
+		$this->assertEquals( $px2git->get_path_git_home(), $this->path_git_home );
 
 		// 後始末
-		$this->fs->rmdir_r( $this->path_git_home.'.git' );
-		$this->assertFalse( $this->fs->is_dir( $this->path_git_home.'.git' ) );
+		// $this->fs->rmdir_r( $this->path_git_home.'.git' );
+		// $this->assertFalse( $this->fs->is_dir( $this->path_git_home.'.git' ) );
 	}
 
 	/**
@@ -74,30 +80,30 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$px2git->init( $this->path_git_home );
 		$this->assertTrue( $this->fs->is_dir( $this->path_git_home.'.git' ) );
+		$this->assertEquals( $px2git->get_path_git_home(), $this->path_git_home );
 
-		// $px2git->commit_sitemap();
-		//
-		// $log = $px2git->log();
-		// var_dump($log);
+		$this->fs->copy(
+			__DIR__.'/testdata/sample_data/sitemaps/b/sitemap.csv',
+			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
+		);
 
-		// 後始末
-		$this->fs->rmdir_r( $this->path_git_home.'.git' );
-		$this->assertFalse( $this->fs->is_dir( $this->path_git_home.'.git' ) );
+		$px2git->commit_sitemap();
+
+		$this->fs->copy(
+			__DIR__.'/testdata/sample_data/sitemaps/a/sitemap.csv',
+			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
+		);
+
+		$px2git->commit_sitemap();
+
+		$log = $px2git->log();
+		var_dump($log);
 	}
 
 	/**
 	 * 後始末
 	 */
-	public function testAfter(){
-
-		// -------------------
-		// execute test
-		$output = $this->passthru( [
-			'php',
-			__DIR__.'/testdata/htdocs/.px_execute.php' ,
-			'/' ,
-		] );
-		clearstatcache();
+	public function tearDown(){
 
 		// 後始末
 		$output = $this->passthru( [
@@ -109,8 +115,12 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( !is_dir( __DIR__.'/testdata/htdocs/px-files/_sys/ram/caches/sitemaps/' ) );
 
 
-		$this->fs->rmdir_r( $this->path_git_home.'.git' );
-		$this->assertFalse( $this->fs->is_dir( $this->path_git_home.'.git' ) );
+		// ディレクトリを削除
+		$result = $this->fs->rmdir_r( $this->path_git_home );
+		if(!$result){
+			echo "FAILED to remove directory: ".$this->path_git_home."\n";
+		}
+// 		$this->assertFalse( $this->fs->is_dir( $this->path_git_home ) );
 	}
 
 
