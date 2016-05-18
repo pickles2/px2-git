@@ -1,0 +1,14 @@
+.DS_Store
+Thumbs.db
+.~*.csv#
+~$*
+!.gitkeep
+vendor/
+composer.lock
+tests/testdata/htdocs/px-files/_sys/ram/
+!tests/testdata/htdocs/px-files/_sys/ram/applock/.gitkeep
+!tests/testdata/htdocs/px-files/_sys/ram/caches/.gitkeep
+!tests/testdata/htdocs/px-files/_sys/ram/data/.gitkeep
+!tests/testdata/htdocs/px-files/_sys/ram/publish/.gitkeep
+tests/testdata/htdocs/caches/
+!tests/testdata/htdocs/caches/.gitkeep

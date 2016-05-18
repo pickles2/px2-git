@@ -1,0 +1,48 @@
+{
+    "name": "tomk79/px2-git",
+    "description": "Pickles 2 ベースで制作したコンテンツをGITへコミット操作するための機能を提供します。",
+    "keywords": ["pickles"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomoya Koyanagi",
+            "email": "tomk79@gmail.com"
+        }
+    ],
+    "scripts":{
+        "test": [
+            "php ./vendor/phpunit/phpunit/phpunit"
+        ] ,
+        "documentation": [
+            "php ./vendor/phpdocumentor/phpdocumentor/bin/phpdoc --title \"px2-git for Pickles 2 API Document\" -d \"./php/\" -t \"./docs/phpdoc/\""
+        ]
+    } ,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "submodules/tomk79/PHPGit"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0" ,
+        "tomk79/filesystem": "1.*",
+        "tomk79/request": "0.1.*",
+        "tomk79/phpgit": "dev-master"
+    },
+    "require-dev": {
+        "pickles2/px-fw-2.x": "2.0.*",
+        "pickles2/broccoli-module-fess": "*",
+        "pickles2/broccoli-module-plain-html-elements": "*",
+        "pickles2/px2-dec": "dev-master",
+        "pickles2/px2-multitheme": "2.*",
+        "pickles2/px2-path-resolver": "2.*",
+        "pickles2/px2-sitemapexcel": "2.*",
+        "phpunit/phpunit": "4.1.*" ,
+        "phpdocumentor/phpdocumentor": "2.8.*"
+    },
+    "autoload": {
+        "files": [
+            "php/px2-git.php"
+        ]
+    }
+}

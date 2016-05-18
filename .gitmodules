@@ -1,0 +1,3 @@
+[submodule "submodules/tomk79/PHPGit"]
+	path = submodules/tomk79/PHPGit
+	url = https://github.com/tomk79/PHPGit.git
