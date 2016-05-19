@@ -11,6 +11,7 @@ class main{
 
 	private $git;
 	private $req;
+	private $command_php = 'php';
 	private $path_entry_script;
 	private $path_homedir;
 	private $path_controot;
@@ -32,25 +33,20 @@ class main{
 
 		if( is_string($px) && is_file($px) ){
 			$this->path_entry_script = $px;
-			$this->path_homedir = json_decode( $this->passthru(array(
-				'php',
-				$this->path_entry_script,
-				'/?PX=api.get.path_homedir'
-			)) );
-			$this->path_controot = json_decode( $this->passthru(array(
-				'php',
-				$this->path_entry_script,
-				'/?PX=api.get.path_controot'
-			)) );
-			$this->path_docroot = json_decode( $this->passthru(array(
-				'php',
-				$this->path_entry_script,
-				'/?PX=api.get.path_docroot'
-			)) );
+			$this->command_php = 'php';
+			$this->path_homedir = json_decode( $this->execute_px2('/?PX=api.get.path_homedir') );
+			$this->path_controot = json_decode( $this->execute_px2('/?PX=api.get.path_controot') );
+			$this->path_docroot = json_decode( $this->execute_px2('/?PX=api.get.path_docroot') );
 		}elseif( is_object($px) ){
+			$this->path_entry_script = $_SERVER['SCRIPT_FILENAME'];
+			$this->command_php = $px->conf()->commands->php;
 			$this->path_homedir = $px->get_path_homedir();
 			$this->path_controot = $px->get_path_controot();
 			$this->path_docroot = $px->get_path_docroot();
+		}else{
+			echo '[ERROR] px2-git gets illegal option.'."\n";
+			echo __FILE__.' ('.__LINE__.')'."\n";
+			exit(1);
 		}
 
 		// finding Repository path
@@ -119,7 +115,16 @@ class main{
 	public function commit_sitemap($commit_message = ''){
 		$path_sitemap = $this->path_homedir.'sitemaps/';
 		// var_dump( $path_sitemap );
-		$this->git->add($path_sitemap."/sitemap.csv", array());
+
+		// ↓px2-sitemapexcel に処理させるため、一度アクセスしておく
+		$res = $this->execute_px2('/');
+		// var_dump( $res );
+
+		$list = glob($path_sitemap.'*');
+		// var_dump($list);
+		foreach( $list as $path_file ){
+			$this->git->add($path_file, array());
+		}
 		// $this->git->add($path_sitemap."/sitemap.xlsx", array());
 
 		try {
@@ -148,15 +153,24 @@ class main{
 
 	/**
 	 * コマンドを実行し、標準出力値を返す
-	 * @param array $ary_command コマンドのパラメータを要素として持つ配列
+	 * @param array|string $commands コマンドのパラメータを要素として持つ配列(または文字列)
 	 * @return string コマンドの標準出力値
 	 */
-	private function passthru( $ary_command ){
+	private function execute_px2( $commands ){
 		set_time_limit(60*10);
-		$cmd = array();
-		foreach( $ary_command as $row ){
-			$param = '"'.addslashes($row).'"';
-			array_push( $cmd, $param );
+		$cmd = array(
+			'"'.addslashes($this->command_php).'"',
+			'"'.addslashes($this->path_entry_script).'"',
+			'--command-php',
+			'"'.addslashes($this->command_php).'"',
+		);
+		if( is_array($commands) ){
+			foreach( $commands as $row ){
+				$param = '"'.addslashes($row).'"';
+				array_push( $cmd, $param );
+			}
+		}elseif( is_string($commands) ){
+			array_push( $cmd, '"'.addslashes($commands).'"' );
 		}
 		$cmd = implode( ' ', $cmd );
 		ob_start();

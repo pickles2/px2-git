@@ -97,7 +97,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$px2git->commit_sitemap();
 
 		$log = $px2git->log();
-		var_dump($log);
+		// var_dump($log);
+		$this->assertNotEmpty( $log );
 	}
 
 	/**
@@ -120,7 +121,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		if(!$result){
 			echo "FAILED to remove directory: ".$this->path_git_home."\n";
 		}
-// 		$this->assertFalse( $this->fs->is_dir( $this->path_git_home ) );
+		// $this->assertFalse( $this->fs->is_dir( $this->path_git_home ) );
 	}
 
 
