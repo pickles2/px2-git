@@ -108,6 +108,62 @@ class main{
 	}
 
 	/**
+	 * git status
+	 * @return array result
+	 */
+	public function status(){
+		// ↓px2-sitemapexcel に処理させるため、一度アクセスしておく
+		$res = $this->execute_px2('/');
+		// var_dump( $res );
+		// $status = array();
+		$status = $this->git->status();
+		// var_dump($status);
+		return $status;
+	}
+
+	/**
+	 * git show
+	 * @return array result
+	 */
+	public function show(){
+		// ↓px2-sitemapexcel に処理させるため、一度アクセスしておく
+		$res = $this->execute_px2('/');
+		// var_dump( $res );
+		// $result = array();
+		$result = $this->git->show();
+		// var_dump($result);
+		return $result;
+	}
+
+	/**
+	 * git branch
+	 * @return array result
+	 */
+	public function branch(){
+		// ↓px2-sitemapexcel に処理させるため、一度アクセスしておく
+		$res = $this->execute_px2('/');
+		// var_dump( $res );
+		// $result = array();
+		$result = $this->git->branch();
+		// var_dump($result);
+		return $result;
+	}
+
+	/**
+	 * git ls-tree
+	 * @return array result
+	 */
+	public function tree(){
+		// ↓px2-sitemapexcel に処理させるため、一度アクセスしておく
+		$res = $this->execute_px2('/');
+		// var_dump( $res );
+		// $tree = array();
+		$tree = $this->git->tree();
+		// var_dump($tree);
+		return $tree;
+	}
+
+	/**
 	 * commit sitemap
 	 * @param string $commit_message コミットメッセージ
 	 * @return array result
