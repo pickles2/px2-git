@@ -19,8 +19,8 @@
     } ,
     "repositories": [
         {
-            "type": "path",
-            "url": "submodules/tomk79/PHPGit"
+            "type": "git",
+            "url": "https://github.com/tomk79/PHPGit.git"
         }
     ],
     "require": {
