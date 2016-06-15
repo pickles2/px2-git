@@ -1,6 +1,6 @@
 {
-    "name": "tomk79/px2-git",
-    "description": "Pickles 2 ベースで制作したコンテンツをGITへコミット操作するための機能を提供します。",
+    "name": "pickles2/px2-git",
+    "description": "Pickles 2 のプロジェクトデータに最適化された git 関連APIを提供します。",
     "keywords": ["pickles"],
     "license": "MIT",
     "authors": [
