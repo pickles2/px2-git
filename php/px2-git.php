@@ -9,15 +9,25 @@ namespace tomk79\pickles2\git;
  */
 class main{
 
+	/** PHPGit オブジェクト */
 	private $git;
+	/** ファイルシステム オブジェクト */
 	private $fs;
+	/** リクエスト管理 オブジェクト */
 	private $req;
+	/** Pickles Framework 2.x オブジェクト */
 	private $px;
+	/** PHPコマンドパス */
 	private $command_php = 'php';
+	/** Pickles 2 のエントリースクリプトのパス */
 	private $path_entry_script;
+	/** Pickles 2 のホームディレクトリ(px-files)のパス */
 	private $path_homedir;
+	/** Pickles 2 のコンテンツルートディレクトリのパス */
 	private $path_controot;
+	/** Pickles 2 のドキュメントルートのパス */
 	private $path_docroot;
+	/** `.git` があるディレクトリのパス */
 	private $path_git_home;
 
 	/**
@@ -25,6 +35,7 @@ class main{
 	 *
 	 * @param string $px Pickles 2 オブジェクト または entry_script のパス
 	 * @param array $options オプション
+	 * `array('bin' => '/usr/local/bin/git')`
 	 */
 	public function __construct( $px, $options = array() ){
 		$this->fs = new \tomk79\filesystem();
@@ -174,6 +185,7 @@ class main{
 
 	/**
 	 * git log (特定ページのコンテンツに限る)
+	 * @param  string $page_path ログを取得したいページのパス
 	 * @return array result
 	 */
 	public function log_contents($page_path){
@@ -318,6 +330,7 @@ class main{
 
 	/**
 	 * git show
+	 * @param  string $hash 対象コミットのハッシュ
 	 * @return array result
 	 */
 	public function show( $hash ){
