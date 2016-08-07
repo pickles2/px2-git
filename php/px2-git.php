@@ -341,6 +341,7 @@ class main{
 		// var_dump( $res );
 		// $result = array();
 		$result = $this->git->show( $hash );
+		$result = mb_strimwidth( $result, 0, 4000, '...' ); // 最大量を制限
 		// var_dump($result);
 		return $result;
 	}

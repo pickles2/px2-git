@@ -87,14 +87,14 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
 		);
 
-		$px2git->commit_sitemap();
+		$px2git->commit_sitemaps();
 
 		$this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/a/sitemap.csv',
 			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
 		);
 
-		$px2git->commit_sitemap();
+		$px2git->commit_sitemaps();
 
 		$log = $px2git->log();
 		// var_dump($log);
