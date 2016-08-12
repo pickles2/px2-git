@@ -19,6 +19,8 @@ class main{
 	private $px;
 	/** PHPコマンドパス */
 	private $command_php = 'php';
+	/** gitコマンドパス */
+	private $command_git = 'git';
 	/** Pickles 2 のエントリースクリプトのパス */
 	private $path_entry_script;
 	/** Pickles 2 のホームディレクトリ(px-files)のパス */
@@ -65,7 +67,11 @@ class main{
 
 		// finding Repository path
 		$base_path = $this->path_entry_script;
+		// var_dump($base_path);
 		while(1){
+			clearstatcache();
+			// var_dump($base_path);
+			// var_dump(@is_dir($base_path.'/.git/'));
 			if( @is_dir($base_path.'/.git/') ){
 				$this->path_git_home = $base_path;
 				break;
@@ -76,6 +82,7 @@ class main{
 			}
 			$base_path = dirname($base_path).'/';
 		}
+		// var_dump(__LINE__);
 		// var_dump($this->path_git_home);
 		if( is_null($this->path_git_home) || !is_dir($this->path_git_home) ){
 			// .git が見つからなかった場合
@@ -84,7 +91,8 @@ class main{
 
 		$this->git = new \PHPGit\Git();
 		if( strlen($options['bin']) ){
-			$this->git->setBin( $options['bin'] );
+			$this->command_git = $options['bin'];
+			$this->git->setBin( $this->command_git );
 		}
 		$this->git->setRepository( $this->path_git_home );
 
@@ -94,7 +102,7 @@ class main{
 
 	/**
 	 * git リポジトリのパスを取得
-	 * @return string git リポジトリのパス
+	 * @return string gitリポジトリのパス
 	 */
 	public function get_path_git_home(){
 		if( is_null($this->path_git_home) || !is_dir($this->path_git_home) ){
@@ -109,7 +117,7 @@ class main{
 	 * @param  string $path	リポジトリを作成するディレクトリ
 	 * @param  array  $options オプション
 	 * `array('shared' => true, 'bare' => true)`
-	 * @return bool			result
+	 * @return bool result
 	 */
 	public function init($path,  $options = array()){
 		if( file_exists( $path.'/.git' ) ){
@@ -118,28 +126,53 @@ class main{
 		// var_dump($path);
 		// var_dump($options);
 		$res = $this->git->init($path, $options);
-		$this->path_git_home = $path;
+
+		$base_path = $path;
+		while(1){
+			clearstatcache();
+			// var_dump($base_path);
+			// var_dump(@is_dir($base_path.'/.git/'));
+			if( @is_dir($base_path.'/.git/') ){
+				$this->path_git_home = $base_path;
+				break;
+			}
+			if( $base_path == dirname($base_path).'/' ){
+				// not found
+				break;
+			}
+			$base_path = dirname($base_path).'/';
+		}
+		// var_dump(__LINE__);
+		// var_dump($this->path_git_home);
+
 		$this->git->setRepository( $this->path_git_home );
 		// var_dump($res);
 		return $res;
+	} // init()
+
+
+	/**
+	 * branch list
+	 * @return array result
+	 */
+	public function branch_list(){
+		if( is_null($this->git) ){ return false; }
+		$result = $this->git->branch();
+		// var_dump($result);
+		return $result;
 	}
 
-	// /**
-	//  * git branch
-	//  * @return array result
-	//  */
-	// public function branch(){
-	// 	if( is_null($this->git) ){ return false; }
-	//
-	// 	// ↓px2-sitemapexcel に処理させるため、一度アクセスしておく
-	// 	$res = $this->execute_px2('/');
-	// 	// var_dump( $res );
-	// 	// $result = array();
-	// 	$result = $this->git->branch();
-	// 	// var_dump($result);
-	// 	return $result;
-	// }
-	//
+	/**
+	 * create branch
+	 * @return bool result
+	 */
+	public function create_branch( $branch_name ){
+		if( is_null($this->git) ){ return false; }
+		$result = $this->git->branch->create( $branch_name );
+		// var_dump($result);
+		return $result;
+	}
+
 	// /**
 	//  * git ls-tree
 	//  * @return array result
@@ -438,6 +471,55 @@ class main{
 
 		return $res;
 	}
+
+
+	/**
+	 * commit all files
+	 * @param string $commit_message コミットメッセージ
+	 * @return array result
+	 */
+	public function commit_all($commit_message = ''){
+		if( is_null($this->git) ){ return false; }
+
+		$status = $this->status();
+		if( !count($status['changes']) ){
+			// コミットすべきファイルがありません。
+			return true;
+		}
+		// var_dump($status);
+
+		foreach( $status['changes'] as $idx=>$file ){
+			$realpath_file = $this->fs->get_realpath($this->path_git_home.'/'.$file['file']);
+			if( $file['work_tree'] == 'D' ){
+				$this->git->rm($realpath_file, array());
+			}else{
+				$this->git->add($realpath_file, array());
+			}
+		}
+
+		try {
+			// throw new \Exception("Some error message");
+			$res = $this->git->commit(
+				trim(''.$commit_message),
+				array()
+			);
+		} catch(\Exception $e) {
+			echo "\n\n\n";
+			echo '---- PHPGit Exception: code '.$e->getCode().';'."\n";
+			echo $e->getFile();
+			echo ' (Line: '.$e->getLine().')'."\n";
+			echo( $e->getMessage() );
+			echo "\n";
+			// var_dump( $e->getTrace() );
+			// echo "\n";
+			echo '---------- / PHPGit Exception'."\n";
+		}
+		// var_dump(__LINE__);
+		// var_dump($res);
+
+		return $res;
+	}
+
 
 	/**
 	 * ファイルの状態を判定する

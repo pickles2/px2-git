@@ -4,12 +4,18 @@
  */
 class mainTest extends PHPUnit_Framework_TestCase{
 	private $fs;
+	private $px2git;
 	private $path_git_home;
 	private $path_entry_script;
 
 	public function setup(){
 		mb_internal_encoding('UTF-8');
 		$this->fs = new tomk79\filesystem();
+
+		// $result = $this->fs->rmdir_r( __DIR__.'/testdata/git_home/' );
+		// if(!$result){
+		// 	echo "FAILED to remove directory: ".__DIR__.'/testdata/git_home/'."\n";
+		// }
 
 		$this->fs->copy_r(
 			__DIR__.'/testdata/htdocs/',
@@ -18,93 +24,114 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->path_git_home = __DIR__.'/testdata/git_home/';
 		$this->path_entry_script = __DIR__.'/testdata/git_home/.px_execute.php';
+
+		$this->px2git = new tomk79\pickles2\git\main( $this->path_entry_script );
 	}
 
 
+	// /**
+	//  * $px2git provider
+	//  * @return array $px2git list
+	//  */
+	// public function px2gitProvider(){
+	// 	$this->setup();
+	// 	// var_dump($this->path_entry_script);
+	// 	// var_dump($this->path_git_home);
+	// 	// var_dump(__LINE__);
+	//
+	// 	// $git = new \PHPGit\Git();
+	// 	// $res = $git->init($this->path_git_home, array());
+	//
+	// 	$rtn = array();
+	//
+	// 	// --------------------------------
+	// 	// entry_script から生成
+	// 	array_push($rtn, array(new tomk79\pickles2\git\main( $this->path_entry_script )));
+	//
+	// 	// --------------------------------
+	// 	// $px のインスタンスから生成
+	// 	$memo_SCRIPT_FILENAME = $_SERVER['SCRIPT_FILENAME'];
+	// 	$_SERVER['SCRIPT_FILENAME'] = $this->path_entry_script;
+	// 	$cd = realpath('.');
+	// 	chdir( $this->path_git_home );
+	// 	$px = new picklesFramework2\px('./px-files/');
+	//
+	// 	$px2git = new tomk79\pickles2\git\main( $px );
+	// 	array_push($rtn, array($px2git));
+	//
+	// 	$_SERVER['SCRIPT_FILENAME'] = $memo_SCRIPT_FILENAME;
+	// 	chdir( $cd );
+	//
+	// 	return $rtn;
+	// }
+
 	/**
-	 * $px2git provider
-	 * @return array $px2git list
+	 * 基本テストパターン
 	 */
-	public function px2gitProvider(){
-		$this->setup();
-		// var_dump($this->path_entry_script);
-		// var_dump($this->path_git_home);
-		// var_dump(__LINE__);
+	public function testBasicPattern(){
 
-		$git = new \PHPGit\Git();
-		$res = $git->init($this->path_git_home, array());
-
-		$rtn = array();
-
-		// --------------------------------
-		// entry_script から生成
-		array_push($rtn, array(new tomk79\pickles2\git\main( $this->path_entry_script )));
-
-		// --------------------------------
-		// $px のインスタンスから生成
-		$memo_SCRIPT_FILENAME = $_SERVER['SCRIPT_FILENAME'];
-		$_SERVER['SCRIPT_FILENAME'] = $this->path_entry_script;
-		$cd = realpath('.');
-		chdir( $this->path_git_home );
-		$px = new picklesFramework2\px('./px-files/');
-
-		$px2git = new tomk79\pickles2\git\main( $px );
-		// array_push($rtn, array($px2git));
-
-		$_SERVER['SCRIPT_FILENAME'] = $memo_SCRIPT_FILENAME;
-		chdir( $cd );
-
-		return $rtn;
-	}
-
-	/**
-	 * git init
-	 * @dataProvider px2gitProvider
-	 */
-	public function testInit($px2git){
-
-		$px2git->init( $this->path_git_home );
+		// --------------------------------------
+		// リポジトリを初期化
+		$this->px2git->init( $this->path_git_home );
 		$this->assertTrue( $this->fs->is_dir( $this->path_git_home.'.git' ) );
-		$this->assertEquals( $px2git->get_path_git_home(), $this->path_git_home );
+		$this->assertEquals( $this->px2git->get_path_git_home(), $this->path_git_home );
 
-		// 後始末
-		// $this->fs->rmdir_r( $this->path_git_home.'.git' );
-		// $this->assertFalse( $this->fs->is_dir( $this->path_git_home.'.git' ) );
-	}
 
-	/**
-	 * git log
-	 * @dataProvider px2gitProvider
-	 */
-	public function testCommitLog($px2git){
+		// --------------------------------------
+		// 全ファイルをコミット
+		$this->px2git->commit_all('initial commit. (test)');
 
-		$px2git->init( $this->path_git_home );
-		$this->assertTrue( $this->fs->is_dir( $this->path_git_home.'.git' ) );
-		$this->assertEquals( $px2git->get_path_git_home(), $this->path_git_home );
 
+		// --------------------------------------
+		// サイトマップを編集してコミット
 		$this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/b/sitemap.csv',
 			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
 		);
 
-		$px2git->commit_sitemaps();
+		$this->px2git->commit_sitemaps();
 
 		$this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/a/sitemap.csv',
 			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
 		);
 
-		$px2git->commit_sitemaps();
+		$this->px2git->commit_sitemaps();
 
-		$log = $px2git->log();
+		$log = $this->px2git->log();
 		// var_dump($log);
 		$this->assertNotEmpty( $log );
-	}
+		$this->assertEquals( count($log), 1 );
+		$this->assertEquals( $log[0]['title'], 'initial commit. (test)' );
+
+		// $this->git = new \PHPGit\Git();
+		// $this->git->setRepository( $this->path_git_home );
+		// var_dump($this->git->log());
+
+
+
+		// --------------------------------------
+		// ブランチの一覧を取得する
+		$branches = $this->px2git->branch_list();
+		$this->assertTrue( is_array($branches['master']) );
+		$this->assertFalse( is_array($branches['testbranch']) );
+
+		// --------------------------------------
+		// ブランチ "testbranch" を作成する
+		$this->assertTrue( $this->px2git->create_branch('testbranch') );
+		$branches = $this->px2git->branch_list();
+		// var_dump($branches);
+		$this->assertTrue( is_array($branches['master']) );
+		$this->assertTrue( is_array($branches['testbranch']) );
+
+
+	} // testBasicPattern()
+
 
 	/**
 	 * 後始末
 	 */
-	public function tearDown(){
+	public function testDown(){
 
 		// 後始末
 		$output = $this->passthru( [
@@ -117,11 +144,12 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 		// ディレクトリを削除
+		exec('rm -r '.__DIR__.'/testdata/git_home/.git/');
 		$result = $this->fs->rmdir_r( $this->path_git_home );
 		if(!$result){
 			echo "FAILED to remove directory: ".$this->path_git_home."\n";
 		}
-		// $this->assertFalse( $this->fs->is_dir( $this->path_git_home ) );
+		$this->assertFalse( $this->fs->is_dir( $this->path_git_home ) );
 	}
 
 
