@@ -1,10 +1,23 @@
-# px2-git
+# pickles2/px2-git
 
 Pickles 2 のプロジェクトデータに最適化された git 関連APIを提供します。
 
 ## API List
 
-docs/phpdoc/index.html を参照してください。
+`docs/phpdoc/index.html` を参照してください。
+
+## Change log
+
+### pickles2/px2-git@2.0.0-beta.2 (2016-??-??)
+
+- `$px2git->show()` の最大文字数制限を追加。
+- `$px2git->branch_list()` 追加。
+- `$px2git->create_branch()` 追加。
+- `$px2git->commit_all()` 追加。
+
+### pickles2/px2-git@2.0.0-beta.1 (2016-06-15)
+
+- initial release.
 
 ## ライセンス - License
 
