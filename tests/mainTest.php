@@ -109,6 +109,14 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// var_dump($this->git->log());
 
 
+		// --------------------------------------
+		// コミットの詳細を取得する
+		$hash = $log[0]['hash'];
+		// var_dump($hash);
+		$last_commit = $this->px2git->show( $hash );
+		// var_dump($last_commit);
+		$this->assertEquals( strlen($last_commit['plain']), 4000 );
+
 
 		// --------------------------------------
 		// ブランチの一覧を取得する

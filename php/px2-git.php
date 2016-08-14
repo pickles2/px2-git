@@ -373,10 +373,11 @@ class main{
 		$res = $this->execute_px2('/');
 		// var_dump( $res );
 		// $result = array();
-		$result = $this->git->show( $hash );
-		$result = mb_strimwidth( $result, 0, 4000, '...' ); // 最大量を制限
+		$rtn = array();
+		$rtn['plain'] = $this->git->show( $hash );
+		$rtn['plain'] = mb_strimwidth( $rtn['plain'], 0, 4000, '...' ); // 最大量を制限
 		// var_dump($result);
-		return $result;
+		return $rtn;
 	}
 
 	/**
