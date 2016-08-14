@@ -86,23 +86,36 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// サイトマップを編集してコミット
 		$this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/b/sitemap.csv',
-			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
+			$this->path_git_home.'/px-files/sitemaps/sitemap.csv'
 		);
 
-		$this->px2git->commit_sitemaps();
+		$status = $this->px2git->status();
+		// var_dump($status);
+		$this->assertEquals( $status['div']['sitemaps'][0]['file'], 'px-files/sitemaps/sitemap.csv' );
+		$this->assertEquals( $status['div']['sitemaps'][0]['work_tree'], 'M' );
+
+		$this->px2git->commit_sitemaps('commit sitemaps - b');
+
+		$log = $this->px2git->log();
+		// var_dump($log);
 
 		$this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/a/sitemap.csv',
-			__DIR__.'/testdata/htdocs/px-files/sitemaps/sitemap.csv'
+			$this->path_git_home.'/px-files/sitemaps/sitemap.csv'
 		);
 
-		$this->px2git->commit_sitemaps();
+		$status = $this->px2git->status();
+		// var_dump($status);
+		$this->assertEquals( $status['div']['sitemaps'][0]['file'], 'px-files/sitemaps/sitemap.csv' );
+		$this->assertEquals( $status['div']['sitemaps'][0]['work_tree'], 'M' );
+
+		$this->px2git->commit_sitemaps('commit sitemaps - a');
 
 		$log = $this->px2git->log();
 		// var_dump($log);
 		$this->assertNotEmpty( $log );
-		$this->assertEquals( count($log), 1 );
-		$this->assertEquals( $log[0]['title'], 'initial commit. (test)' );
+		$this->assertEquals( count($log), 3 );
+		$this->assertEquals( $log[2]['title'], 'initial commit. (test)' );
 
 		// $this->git = new \PHPGit\Git();
 		// $this->git->setRepository( $this->path_git_home );
@@ -111,11 +124,11 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// --------------------------------------
 		// コミットの詳細を取得する
-		$hash = $log[0]['hash'];
-		// var_dump($hash);
+		$hash = $log[2]['hash'];
 		$last_commit = $this->px2git->show( $hash );
+		// var_dump($hash);
 		// var_dump($last_commit);
-		$this->assertEquals( strlen($last_commit['plain']), 4000 );
+		$this->assertEquals( gettype($last_commit['plain']), gettype('') );
 
 
 		// --------------------------------------
