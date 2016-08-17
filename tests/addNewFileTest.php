@@ -2,7 +2,7 @@
 /**
  * test for px2-git
  */
-class mainTest extends PHPUnit_Framework_TestCase{
+class addNewFileTest extends PHPUnit_Framework_TestCase{
 	private $fs;
 	private $px2git;
 	private $path_git_home;
@@ -29,42 +29,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 
 
-	// /**
-	//  * $px2git provider
-	//  * @return array $px2git list
-	//  */
-	// public function px2gitProvider(){
-	// 	$this->setup();
-	// 	// var_dump($this->path_entry_script);
-	// 	// var_dump($this->path_git_home);
-	// 	// var_dump(__LINE__);
-	//
-	// 	// $git = new \PHPGit\Git();
-	// 	// $res = $git->init($this->path_git_home, array());
-	//
-	// 	$rtn = array();
-	//
-	// 	// --------------------------------
-	// 	// entry_script から生成
-	// 	array_push($rtn, array(new tomk79\pickles2\git\main( $this->path_entry_script )));
-	//
-	// 	// --------------------------------
-	// 	// $px のインスタンスから生成
-	// 	$memo_SCRIPT_FILENAME = $_SERVER['SCRIPT_FILENAME'];
-	// 	$_SERVER['SCRIPT_FILENAME'] = $this->path_entry_script;
-	// 	$cd = realpath('.');
-	// 	chdir( $this->path_git_home );
-	// 	$px = new picklesFramework2\px('./px-files/');
-	//
-	// 	$px2git = new tomk79\pickles2\git\main( $px );
-	// 	array_push($rtn, array($px2git));
-	//
-	// 	$_SERVER['SCRIPT_FILENAME'] = $memo_SCRIPT_FILENAME;
-	// 	chdir( $cd );
-	//
-	// 	return $rtn;
-	// }
-
 	/**
 	 * 基本テストパターン
 	 */
@@ -78,11 +42,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 		// --------------------------------------
-		// 全ファイルをコミット
-		$this->px2git->commit_all('initial commit. (test)');
-
-
-		// --------------------------------------
 		// サイトマップを編集してコミット
 		$this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/b/sitemap.csv',
@@ -90,7 +49,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		);
 
 		$status = $this->px2git->status();
-		// var_dump($status);
+		var_dump($status);
 		$this->assertEquals( $status['div']['sitemaps'][0]['file'], 'px-files/sitemaps/sitemap.csv' );
 		$this->assertEquals( $status['div']['sitemaps'][0]['work_tree'], 'M' );
 		$this->assertEquals( $status['div']['sitemaps'][1]['file'], 'px-files/sitemaps/sitemap.xlsx' );
