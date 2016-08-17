@@ -266,7 +266,7 @@ class main{
 		$res = $this->execute_px2('/');
 		// var_dump( $res );
 		// $status = array();
-		$status = $this->git->status();
+		$status = $this->git->status( array( 'untracked-files'=>true ) );
 		$status['div'] = array(
 			'sitemaps' => array(),
 			'themes' => array(),
