@@ -43,27 +43,27 @@ class addNewFileTest extends PHPUnit_Framework_TestCase{
 
 		// --------------------------------------
 		// サイトマップを編集してコミット
-		$this->fs->copy(
+		$this->assertTrue( $this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/b/sitemap.csv',
 			$this->path_git_home.'/px-files/sitemaps/sitemap.csv'
-		);
+		) );
 
 		$status = $this->px2git->status();
-		var_dump($status);
+		// var_dump($status);
 		$this->assertEquals( $status['div']['sitemaps'][0]['file'], 'px-files/sitemaps/sitemap.csv' );
-		$this->assertEquals( $status['div']['sitemaps'][0]['work_tree'], 'M' );
+		$this->assertEquals( $status['div']['sitemaps'][0]['work_tree'], '?' );
 		$this->assertEquals( $status['div']['sitemaps'][1]['file'], 'px-files/sitemaps/sitemap.xlsx' );
-		$this->assertEquals( $status['div']['sitemaps'][1]['work_tree'], 'M' );
+		$this->assertEquals( $status['div']['sitemaps'][1]['work_tree'], '?' );
 
 		$this->px2git->commit_sitemaps('commit sitemaps - b');
 
 		$log = $this->px2git->log();
 		// var_dump($log);
 
-		$this->fs->copy(
+		$this->assertTrue( $this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/a/sitemap.csv',
 			$this->path_git_home.'/px-files/sitemaps/sitemap.csv'
-		);
+		) );
 
 		$status = $this->px2git->status();
 		// var_dump($status);
@@ -76,9 +76,10 @@ class addNewFileTest extends PHPUnit_Framework_TestCase{
 
 		$log = $this->px2git->log();
 		// var_dump($log);
+		// var_dump(count($log));
 		$this->assertNotEmpty( $log );
-		$this->assertEquals( count($log), 3 );
-		$this->assertEquals( $log[2]['title'], 'initial commit. (test)' );
+		$this->assertEquals( count($log), 2 );
+		$this->assertEquals( $log[1]['title'], 'commit sitemaps - b' );
 
 		// $this->git = new \PHPGit\Git();
 		// $this->git->setRepository( $this->path_git_home );
@@ -87,7 +88,7 @@ class addNewFileTest extends PHPUnit_Framework_TestCase{
 
 		// --------------------------------------
 		// コミットの詳細を取得する
-		$hash = $log[2]['hash'];
+		$hash = $log[1]['hash'];
 		$last_commit = $this->px2git->show( $hash );
 		// var_dump($hash);
 		// var_dump($last_commit);

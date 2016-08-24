@@ -84,10 +84,10 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// --------------------------------------
 		// サイトマップを編集してコミット
-		$this->fs->copy(
+		$this->assertTrue( $this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/b/sitemap.csv',
 			$this->path_git_home.'/px-files/sitemaps/sitemap.csv'
-		);
+		) );
 
 		$status = $this->px2git->status();
 		// var_dump($status);
@@ -101,10 +101,10 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$log = $this->px2git->log();
 		// var_dump($log);
 
-		$this->fs->copy(
+		$this->assertTrue( $this->fs->copy(
 			__DIR__.'/testdata/sample_data/sitemaps/a/sitemap.csv',
 			$this->path_git_home.'/px-files/sitemaps/sitemap.csv'
-		);
+		) );
 
 		$status = $this->px2git->status();
 		// var_dump($status);
