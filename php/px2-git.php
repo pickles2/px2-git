@@ -60,7 +60,7 @@ class main{
 			$this->path_controot = $this->px->get_path_controot();
 			$this->path_docroot = $this->px->get_path_docroot();
 		}else{
-			echo '[ERROR] px2-git gets illegal option.'."\n";
+			echo '[ERROR] px2-git gets illegal option `$px`.'."\n";
 			echo __FILE__.' ('.__LINE__.')'."\n";
 			exit(1);
 		}
