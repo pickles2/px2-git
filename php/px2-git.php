@@ -673,10 +673,24 @@ class main{
 			array_push( $cmd, escapeshellarg($commands) );
 		}
 		$cmd = implode( ' ', $cmd );
+
 		ob_start();
-		passthru( $cmd );
-		$bin = ob_get_clean();
+		$proc = proc_open($cmd, array(
+			0 => array('pipe','r'),
+			1 => array('pipe','w'),
+			2 => array('pipe','w'),
+		), $pipes);
+		$io = array();
+		foreach($pipes as $idx=>$pipe){
+			$io[$idx] = stream_get_contents($pipes[$idx]);
+			fclose($pipes[$idx]);
+		}
+		proc_close($proc);
+		ob_get_clean();
+
+		$bin = $io[1];
 		set_time_limit(30);
+
 		return $bin;
 	}
 
