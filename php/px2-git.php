@@ -90,7 +90,7 @@ class main{
 		}
 
 		$this->git = new \PHPGit\Git();
-		if( strlen($options['bin']) ){
+		if( @strlen($options['bin']) ){
 			$this->command_git = $options['bin'];
 			$this->git->setBin( $this->command_git );
 		}
@@ -245,7 +245,7 @@ class main{
 		});
 		$logs_hash_done = array();
 		foreach( $logs as $key=>$row ){
-			if( $logs_hash_done[$row['hash']] ){
+			if( @$logs_hash_done[$row['hash']] ){
 				unset( $logs[$key] );
 				continue;
 			}
@@ -659,18 +659,18 @@ class main{
 	private function execute_px2( $commands ){
 		set_time_limit(60*10);
 		$cmd = array(
-			'"'.addslashes($this->command_php).'"',
-			'"'.addslashes($this->path_entry_script).'"',
+			escapeshellarg($this->command_php),
+			escapeshellarg($this->path_entry_script),
 			'--command-php',
-			'"'.addslashes($this->command_php).'"',
+			escapeshellarg($this->command_php),
 		);
 		if( is_array($commands) ){
 			foreach( $commands as $row ){
-				$param = '"'.addslashes($row).'"';
+				$param = escapeshellarg($row);
 				array_push( $cmd, $param );
 			}
 		}elseif( is_string($commands) ){
-			array_push( $cmd, '"'.addslashes($commands).'"' );
+			array_push( $cmd, escapeshellarg($commands) );
 		}
 		$cmd = implode( ' ', $cmd );
 		ob_start();

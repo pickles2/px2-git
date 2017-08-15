@@ -67,6 +67,7 @@ class addNewFileTest extends PHPUnit_Framework_TestCase{
 
 		$status = $this->px2git->status();
 		// var_dump($status);
+		// var_dump($status['div']['sitemaps']);
 		$this->assertEquals( $status['div']['sitemaps'][0]['file'], 'px-files/sitemaps/sitemap.csv' );
 		$this->assertEquals( $status['div']['sitemaps'][0]['work_tree'], 'M' );
 		$this->assertEquals( $status['div']['sitemaps'][1]['file'], 'px-files/sitemaps/sitemap.xlsx' );
@@ -99,7 +100,7 @@ class addNewFileTest extends PHPUnit_Framework_TestCase{
 		// ブランチの一覧を取得する
 		$branches = $this->px2git->branch_list();
 		$this->assertTrue( is_array($branches['master']) );
-		$this->assertFalse( is_array($branches['testbranch']) );
+		$this->assertTrue( is_null(@$branches['testbranch']) );
 
 		// --------------------------------------
 		// ブランチ "testbranch" を作成する

@@ -139,7 +139,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// ブランチの一覧を取得する
 		$branches = $this->px2git->branch_list();
 		$this->assertTrue( is_array($branches['master']) );
-		$this->assertFalse( is_array($branches['testbranch']) );
+		$this->assertTrue( is_null(@$branches['testbranch']) );
 
 		// --------------------------------------
 		// ブランチ "testbranch" を作成する
