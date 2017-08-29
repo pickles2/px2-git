@@ -1,7 +1,7 @@
 {
     "name": "pickles2/px2-git",
     "description": "Pickles 2 のプロジェクトデータに最適化された git 関連APIを提供します。",
-    "keywords": ["pickles"],
+    "keywords": ["pickles2"],
     "license": "MIT",
     "authors": [
         {
@@ -21,18 +21,18 @@
     ],
     "require": {
         "php": ">=5.4.0" ,
-        "tomk79/filesystem": "1.*",
-        "tomk79/request": "0.1.*",
+        "tomk79/filesystem": "^1.0",
+        "tomk79/request": "^1.0",
         "tomk79/phpgit": "0.3.*"
     },
     "require-dev": {
-        "pickles2/px-fw-2.x": "2.0.*",
-        "pickles2/broccoli-module-fess": "*",
-        "pickles2/broccoli-module-plain-html-elements": "*",
+        "broccoli-html-editor/broccoli-module-fess": "*",
+        "broccoli-html-editor/broccoli-module-plain-html-elements": "*",
+        "pickles2/px-fw-2.x": "dev-develop",
         "pickles2/px2-dec": "dev-master",
-        "pickles2/px2-multitheme": "2.*",
-        "pickles2/px2-path-resolver": "2.*",
-        "pickles2/px2-sitemapexcel": "2.*",
+        "pickles2/px2-multitheme": "dev-develop",
+        "pickles2/px2-path-resolver": "dev-develop",
+        "pickles2/px2-sitemapexcel": "dev-develop",
         "phpunit/phpunit": "4.1.*" ,
         "phpdocumentor/phpdocumentor": "2.8.*"
     },

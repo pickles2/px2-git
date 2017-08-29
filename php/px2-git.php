@@ -60,7 +60,7 @@ class main{
 			$this->path_controot = $this->px->get_path_controot();
 			$this->path_docroot = $this->px->get_path_docroot();
 		}else{
-			echo '[ERROR] px2-git gets illegal option.'."\n";
+			echo '[ERROR] px2-git gets illegal option `$px`.'."\n";
 			echo __FILE__.' ('.__LINE__.')'."\n";
 			exit(1);
 		}
@@ -90,7 +90,7 @@ class main{
 		}
 
 		$this->git = new \PHPGit\Git();
-		if( strlen($options['bin']) ){
+		if( @strlen($options['bin']) ){
 			$this->command_git = $options['bin'];
 			$this->git->setBin( $this->command_git );
 		}
@@ -245,7 +245,7 @@ class main{
 		});
 		$logs_hash_done = array();
 		foreach( $logs as $key=>$row ){
-			if( $logs_hash_done[$row['hash']] ){
+			if( @$logs_hash_done[$row['hash']] ){
 				unset( $logs[$key] );
 				continue;
 			}
@@ -659,24 +659,38 @@ class main{
 	private function execute_px2( $commands ){
 		set_time_limit(60*10);
 		$cmd = array(
-			'"'.addslashes($this->command_php).'"',
-			'"'.addslashes($this->path_entry_script).'"',
+			escapeshellarg($this->command_php),
+			escapeshellarg($this->path_entry_script),
 			'--command-php',
-			'"'.addslashes($this->command_php).'"',
+			escapeshellarg($this->command_php),
 		);
 		if( is_array($commands) ){
 			foreach( $commands as $row ){
-				$param = '"'.addslashes($row).'"';
+				$param = escapeshellarg($row);
 				array_push( $cmd, $param );
 			}
 		}elseif( is_string($commands) ){
-			array_push( $cmd, '"'.addslashes($commands).'"' );
+			array_push( $cmd, escapeshellarg($commands) );
 		}
 		$cmd = implode( ' ', $cmd );
+
 		ob_start();
-		passthru( $cmd );
-		$bin = ob_get_clean();
+		$proc = proc_open($cmd, array(
+			0 => array('pipe','r'),
+			1 => array('pipe','w'),
+			2 => array('pipe','w'),
+		), $pipes);
+		$io = array();
+		foreach($pipes as $idx=>$pipe){
+			$io[$idx] = stream_get_contents($pipes[$idx]);
+			fclose($pipes[$idx]);
+		}
+		proc_close($proc);
+		ob_get_clean();
+
+		$bin = $io[1];
 		set_time_limit(30);
+
 		return $bin;
 	}
 

@@ -12,58 +12,28 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		mb_internal_encoding('UTF-8');
 		$this->fs = new tomk79\filesystem();
 
-		// $result = $this->fs->rmdir_r( __DIR__.'/testdata/git_home/' );
-		// if(!$result){
-		// 	echo "FAILED to remove directory: ".__DIR__.'/testdata/git_home/'."\n";
-		// }
-
-		$this->fs->copy_r(
-			__DIR__.'/testdata/htdocs/',
-			__DIR__.'/testdata/git_home/'
-		);
+		require_once(__DIR__.'/testHelper/pickles2query.php');
+		$this->px2query = new testHelper_pickles2query();
 
 		$this->path_git_home = __DIR__.'/testdata/git_home/';
 		$this->path_entry_script = __DIR__.'/testdata/git_home/.px_execute.php';
 
-		$this->px2git = new tomk79\pickles2\git\main( $this->path_entry_script );
+		if( is_file($this->path_entry_script) ){
+			$this->px2git = new tomk79\pickles2\git\main( $this->path_entry_script );
+		}
 	}
 
 
-	// /**
-	//  * $px2git provider
-	//  * @return array $px2git list
-	//  */
-	// public function px2gitProvider(){
-	// 	$this->setup();
-	// 	// var_dump($this->path_entry_script);
-	// 	// var_dump($this->path_git_home);
-	// 	// var_dump(__LINE__);
-	//
-	// 	// $git = new \PHPGit\Git();
-	// 	// $res = $git->init($this->path_git_home, array());
-	//
-	// 	$rtn = array();
-	//
-	// 	// --------------------------------
-	// 	// entry_script から生成
-	// 	array_push($rtn, array(new tomk79\pickles2\git\main( $this->path_entry_script )));
-	//
-	// 	// --------------------------------
-	// 	// $px のインスタンスから生成
-	// 	$memo_SCRIPT_FILENAME = $_SERVER['SCRIPT_FILENAME'];
-	// 	$_SERVER['SCRIPT_FILENAME'] = $this->path_entry_script;
-	// 	$cd = realpath('.');
-	// 	chdir( $this->path_git_home );
-	// 	$px = new picklesFramework2\px('./px-files/');
-	//
-	// 	$px2git = new tomk79\pickles2\git\main( $px );
-	// 	array_push($rtn, array($px2git));
-	//
-	// 	$_SERVER['SCRIPT_FILENAME'] = $memo_SCRIPT_FILENAME;
-	// 	chdir( $cd );
-	//
-	// 	return $rtn;
-	// }
+	/**
+	 * 環境セットアップ
+	 */
+	public function testSetupEnv(){
+		$this->fs->copy_r(
+			__DIR__.'/testdata/htdocs/',
+			__DIR__.'/testdata/git_home/'
+		);
+	}
+
 
 	/**
 	 * 基本テストパターン
@@ -72,9 +42,14 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// --------------------------------------
 		// リポジトリを初期化
-		$this->px2git->init( $this->path_git_home );
+		$result = $this->px2git->init( $this->path_git_home );
+		$this->assertTrue( $result );
 		$this->assertTrue( $this->fs->is_dir( $this->path_git_home.'.git' ) );
 		$this->assertEquals( $this->px2git->get_path_git_home(), $this->path_git_home );
+
+		// 初期化エラーのテスト
+		$result = $this->px2git->init( $this->path_git_home );
+		$this->assertFalse( $result ); // 初期化済みの場合は失敗する
 
 
 		// --------------------------------------
@@ -139,7 +114,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// ブランチの一覧を取得する
 		$branches = $this->px2git->branch_list();
 		$this->assertTrue( is_array($branches['master']) );
-		$this->assertFalse( is_array($branches['testbranch']) );
+		$this->assertTrue( is_null(@$branches['testbranch']) );
 
 		// --------------------------------------
 		// ブランチ "testbranch" を作成する
@@ -151,64 +126,5 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 	} // testBasicPattern()
-
-
-	/**
-	 * 後始末
-	 */
-	public function testDown(){
-
-		// 後始末
-		$output = $this->passthru( [
-			'php', __DIR__.'/testdata/htdocs/.px_execute.php', '/?PX=clearcache'
-		] );
-		clearstatcache();
-		$this->assertTrue( $this->common_error( $output ) );
-		$this->assertTrue( !is_dir( __DIR__.'/testdata/htdocs/caches/p/' ) );
-		$this->assertTrue( !is_dir( __DIR__.'/testdata/htdocs/px-files/_sys/ram/caches/sitemaps/' ) );
-
-
-		// ディレクトリを削除
-		exec('rm -r '.__DIR__.'/testdata/git_home/.git/');
-		$result = $this->fs->rmdir_r( $this->path_git_home );
-		if(!$result){
-			echo "FAILED to remove directory: ".$this->path_git_home."\n";
-		}
-		$this->assertFalse( $this->fs->is_dir( $this->path_git_home ) );
-	}
-
-
-
-
-	/**
-	 * PHPがエラー吐いてないか確認しておく。
-	 */
-	private function common_error( $output ){
-		if( preg_match('/'.preg_quote('Fatal', '/').'/si', $output) ){ return false; }
-		if( preg_match('/'.preg_quote('Warning', '/').'/si', $output) ){ return false; }
-		if( preg_match('/'.preg_quote('Notice', '/').'/si', $output) ){ return false; }
-		return true;
-	}
-
-
-	/**
-	 * コマンドを実行し、標準出力値を返す
-	 * @param array $ary_command コマンドのパラメータを要素として持つ配列
-	 * @return string コマンドの標準出力値
-	 */
-	private function passthru( $ary_command ){
-		set_time_limit(60*10);
-		$cmd = array();
-		foreach( $ary_command as $row ){
-			$param = '"'.addslashes($row).'"';
-			array_push( $cmd, $param );
-		}
-		$cmd = implode( ' ', $cmd );
-		ob_start();
-		passthru( $cmd );
-		$bin = ob_get_clean();
-		set_time_limit(30);
-		return $bin;
-	}
 
 }

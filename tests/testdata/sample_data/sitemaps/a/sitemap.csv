@@ -1,5 +1,5 @@
 "*path","*content","*id","*title","*title_breadcrumb","*title_h1","*title_label","*title_full","*logical_path","*list_flg","*layout","*orderby","*keywords","*description","*category_top_flg","*role"
-"/",,,"HOME",,,,,,1,"top",,,,,
+"/",,,"HOME of Sitemap A",,,,,,1,"top",,,,,
 "/sample_pages/",,,"サンプルページ1",,,,,,1,,,"sample, サンプル","このページはPickles2のサンプルコードとして用意されたものです。",1,
 "/sample_pages/page2/",,,"サンプルページ2",,,,,,1,,,"sample, サンプル","このページはPickles2のサンプルコードとして用意されたものです。",1,
 "/sample_pages/page3/",,,"サンプルページ3",,,,,,1,,,"sample, サンプル","このページはPickles2のサンプルコードとして用意されたものです。",1,
