@@ -8,6 +8,11 @@ Pickles 2 のプロジェクトデータに最適化された git 関連APIを�
 
 ## Change log
 
+### pickles2/px2-git@2.0.0-beta.3 (2017-??-??)
+
+- 対象リポジトリが submodule である場合に対応した。
+- 幾つかの細かい不具合の修正。
+
 ### pickles2/px2-git@2.0.0-beta.2 (2016-08-24)
 
 - `$px2git->show()` の最大文字数制限を追加。

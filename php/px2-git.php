@@ -72,7 +72,8 @@ class main{
 			clearstatcache();
 			// var_dump($base_path);
 			// var_dump(@is_dir($base_path.'/.git/'));
-			if( @is_dir($base_path.'/.git/') ){
+			if( @is_dir($base_path.'/.git/') || @is_file($base_path.'/.git') ){
+				// ※対象リポジトリが git submodule の場合、 .git はディレクトリではなくファイルとして存在している。
 				$this->path_git_home = $base_path;
 				break;
 			}
