@@ -382,6 +382,47 @@ class main{
 	}
 
 	/**
+	 * 任意のファイルをコミットする
+	 * @param array $files コミットするファイルの一覧
+	 * @param string $commit_message コミットメッセージ
+	 * @return array result
+	 */
+	public function commit( $files, $commit_message = '' ){
+		if( is_null($this->git) ){ return false; }
+
+		foreach( $files as $idx=>$file ){
+			$realpath_file = $this->fs->get_realpath($this->path_git_home.'/'.$file['file']);
+			if( $file['work_tree'] == 'D' ){
+				$this->git->rm($realpath_file, array());
+			}else{
+				$this->git->add($realpath_file, array());
+			}
+		}
+
+		try {
+			// throw new \Exception("Some error message");
+			$res = $this->git->commit(
+				trim(''.$commit_message),
+				array()
+			);
+		} catch(\Exception $e) {
+			echo "\n\n\n";
+			echo '---- PHPGit Exception: code '.$e->getCode().';'."\n";
+			echo $e->getFile();
+			echo ' (Line: '.$e->getLine().')'."\n";
+			echo( $e->getMessage() );
+			echo "\n";
+			// var_dump( $e->getTrace() );
+			// echo "\n";
+			echo '---------- / PHPGit Exception'."\n";
+		}
+		// var_dump(__LINE__);
+		// var_dump($res);
+
+		return $res;
+	}
+
+	/**
 	 * commit sitemaps
 	 * @param string $commit_message コミットメッセージ
 	 * @return array result
