@@ -60,7 +60,7 @@ class main{
 			$this->path_controot = $this->px->get_path_controot();
 			$this->path_docroot = $this->px->get_path_docroot();
 		}else{
-			echo '[ERROR] px2-git gets illegal option.'."\n";
+			echo '[ERROR] px2-git gets illegal option `$px`.'."\n";
 			echo __FILE__.' ('.__LINE__.')'."\n";
 			exit(1);
 		}
@@ -72,7 +72,8 @@ class main{
 			clearstatcache();
 			// var_dump($base_path);
 			// var_dump(@is_dir($base_path.'/.git/'));
-			if( @is_dir($base_path.'/.git/') ){
+			if( @is_dir($base_path.'/.git/') || @is_file($base_path.'/.git') ){
+				// ※対象リポジトリが git submodule の場合、 .git はディレクトリではなくファイルとして存在している。
 				$this->path_git_home = $base_path;
 				break;
 			}
@@ -90,7 +91,7 @@ class main{
 		}
 
 		$this->git = new \PHPGit\Git();
-		if( strlen($options['bin']) ){
+		if( @strlen($options['bin']) ){
 			$this->command_git = $options['bin'];
 			$this->git->setBin( $this->command_git );
 		}
@@ -245,7 +246,7 @@ class main{
 		});
 		$logs_hash_done = array();
 		foreach( $logs as $key=>$row ){
-			if( $logs_hash_done[$row['hash']] ){
+			if( @$logs_hash_done[$row['hash']] ){
 				unset( $logs[$key] );
 				continue;
 			}
@@ -378,6 +379,47 @@ class main{
 		$rtn['plain'] = mb_strimwidth( $rtn['plain'], 0, 4000, '...' ); // 最大量を制限
 		// var_dump($result);
 		return $rtn;
+	}
+
+	/**
+	 * 任意のファイルをコミットする
+	 * @param array $files コミットするファイルの一覧
+	 * @param string $commit_message コミットメッセージ
+	 * @return array result
+	 */
+	public function commit( $files, $commit_message = '' ){
+		if( is_null($this->git) ){ return false; }
+
+		foreach( $files as $idx=>$file ){
+			$realpath_file = $this->fs->get_realpath($this->path_git_home.'/'.$file['file']);
+			if( $file['work_tree'] == 'D' ){
+				$this->git->rm($realpath_file, array());
+			}else{
+				$this->git->add($realpath_file, array());
+			}
+		}
+
+		try {
+			// throw new \Exception("Some error message");
+			$res = $this->git->commit(
+				trim(''.$commit_message),
+				array()
+			);
+		} catch(\Exception $e) {
+			echo "\n\n\n";
+			echo '---- PHPGit Exception: code '.$e->getCode().';'."\n";
+			echo $e->getFile();
+			echo ' (Line: '.$e->getLine().')'."\n";
+			echo( $e->getMessage() );
+			echo "\n";
+			// var_dump( $e->getTrace() );
+			// echo "\n";
+			echo '---------- / PHPGit Exception'."\n";
+		}
+		// var_dump(__LINE__);
+		// var_dump($res);
+
+		return $res;
 	}
 
 	/**
@@ -659,24 +701,38 @@ class main{
 	private function execute_px2( $commands ){
 		set_time_limit(60*10);
 		$cmd = array(
-			'"'.addslashes($this->command_php).'"',
-			'"'.addslashes($this->path_entry_script).'"',
+			escapeshellarg($this->command_php),
+			escapeshellarg($this->path_entry_script),
 			'--command-php',
-			'"'.addslashes($this->command_php).'"',
+			escapeshellarg($this->command_php),
 		);
 		if( is_array($commands) ){
 			foreach( $commands as $row ){
-				$param = '"'.addslashes($row).'"';
+				$param = escapeshellarg($row);
 				array_push( $cmd, $param );
 			}
 		}elseif( is_string($commands) ){
-			array_push( $cmd, '"'.addslashes($commands).'"' );
+			array_push( $cmd, escapeshellarg($commands) );
 		}
 		$cmd = implode( ' ', $cmd );
+
 		ob_start();
-		passthru( $cmd );
-		$bin = ob_get_clean();
+		$proc = proc_open($cmd, array(
+			0 => array('pipe','r'),
+			1 => array('pipe','w'),
+			2 => array('pipe','w'),
+		), $pipes);
+		$io = array();
+		foreach($pipes as $idx=>$pipe){
+			$io[$idx] = stream_get_contents($pipes[$idx]);
+			fclose($pipes[$idx]);
+		}
+		proc_close($proc);
+		ob_get_clean();
+
+		$bin = $io[1];
 		set_time_limit(30);
+
 		return $bin;
 	}
 
